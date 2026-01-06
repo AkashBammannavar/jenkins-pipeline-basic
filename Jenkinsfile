@@ -2,22 +2,33 @@ pipeline {
     agent any
 
     stages {
-        stage('Stage 1') {
+
+        stage('Checkout') {
             steps {
-                bat 'echo Hello from GitHub Jenkinsfile'
+                echo 'Code pulled from GitHub'
             }
         }
 
-        stage('Stage 2') {
+        stage('Build Docker Image') {
             steps {
-                bat 'echo Jenkins is pulling code from GitHub'
+                bat 'docker build -t cd-demo-app .'
             }
         }
 
-        stage('Stage 3') {
+        stage('Run Docker Container') {
             steps {
-                bat 'echo GitHub + Jenkins pipeline SUCCESS'
+                bat '''
+                docker stop cd-demo || exit 0
+                docker rm cd-demo || exit 0
+                docker run --name cd-demo cd-demo-app
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'CD Pipeline completed successfully'
         }
     }
 }
